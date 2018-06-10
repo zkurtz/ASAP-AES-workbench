@@ -27,6 +27,7 @@ class Lgbm(object):
         })
 
     def _train(self, idx):
+        ''' Train a classifier on the data corresponding to the rows in `idx` '''
         y = self.y[idx]
         data = lgb.Dataset(self.X.iloc[idx], y)
         params = {
@@ -39,12 +40,14 @@ class Lgbm(object):
         }
         bst = lgb.train(params=params,
                         train_set=data,
-                        num_boost_round=1, #00,
+                        num_boost_round=100,
                         verbose_eval=False)
         return bst
 
     def train_one_fold(self, k):
         '''
+        Train a separate model for each essay set
+
         :param k: index of fold in self.folds
         '''
         if self.verbose:

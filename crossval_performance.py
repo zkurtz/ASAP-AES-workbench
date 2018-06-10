@@ -22,18 +22,22 @@ raw = pd.read_csv(utils.data_path('training_set_rel3.tsv'), sep='\t', encoding =
 emb = pd.read_csv(efpath("train_txt_features.csv"))
 toks = utils.json_load(efpath('train_tokenized.json'))
 
-def length_only_lightgbm_benchmark(raw, toks):
-    print('assemble data')
+def prepare_data():
+    print('preparing data')
     X = pd.DataFrame({
         'nchar': [len(s) for s in raw.essay],
         'nword': [len(doc) for doc in toks]
     })
-    data = {
+    X = pd.concat([X, emb], axis = 1)
+    # np.corrcoef(X.nchar.values, X.nword.values)
+    return {
         'X': X,
         'y': raw[TARGET].values,
         'essay_set': raw['essay_set']
     }
-    print('fit lightgbm')
+
+def test_and_evaluate_lightgbm(data):
+    print('fitting lightgbm')
     lgbm = lgb.Lgbm(data, verbose=1)
     lgbm.train_all_folds()
     print('cross-validation performance:')
@@ -41,11 +45,13 @@ def length_only_lightgbm_benchmark(raw, toks):
     preds['pred'] = np.round(preds.pred.values).astype('int')
     preds.sort_values('idx', inplace=True)
     preds['truth'] = raw[TARGET].astype('int').values
-    kappas = [metrics.kappa(g.pred.values, g.truth.values) for e, g in preds.groupby('essay_set')]
-    print(kappas)
-    print(metrics.mean_quadratic_weighted_kappa(kappas))
+    metrics.evaluate(preds)
 
-length_only_lightgbm_benchmark(raw, toks)
+def length_only_lightgbm_benchmark():
+    data = prepare_data()
+    test_and_evaluate_lightgbm(data)
+
+length_only_lightgbm_benchmark()
 
 # # Assemble data
 # emb['essay_set'] = df.essay_set

@@ -75,6 +75,6 @@ dependencies:
     - en-core-web-sm==2.0.0
     - lightgbm==2.1.1
     - ml-metrics==0.1.4
-    - when-will-it-end==0.1.dev0
+    - when-will-it-end==0.0.2
 prefix: /Users/me/miniconda/envs/asap
 

@@ -1,4 +1,5 @@
-# All code here is copied from https://github.com/benhamner/ASAP-AES/blob/master/Evaluation_Metrics/Python/score/score.py
+# Most of the code here is copied verbatim from
+#   https://github.com/benhamner/ASAP-AES/blob/master/Evaluation_Metrics/Python/score/score.py
 
 from functools import reduce
 import numpy
@@ -165,3 +166,11 @@ def mean_quadratic_weighted_kappa(kappas, weights=None):
     z = numpy.mean(z)
     kappa = (numpy.exp(2 * z) - 1) / (numpy.exp(2 * z) + 1)
     return kappa
+
+def evaluate(preds):
+    '''
+    :param preds: (pd.DataFrame) must include integer columns ['truth', 'pred', 'essay_set']
+    '''
+    kappas = [kappa(g.pred.values, g.truth.values) for e, g in preds.groupby('essay_set')]
+    print(kappas)
+    print(mean_quadratic_weighted_kappa(kappas))
