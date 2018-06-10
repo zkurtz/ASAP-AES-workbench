@@ -5,7 +5,10 @@ import os
 import pandas as pd
 import pdb
 
-from asap_essay_scoring import lightgbm as lgb
+#from asap_essay_scoring import lightgbm as lgb
+from asap_essay_scoring import cross_predict
+from asap_essay_scoring import data
+from asap_essay_scoring import learners
 from asap_essay_scoring import metrics
 from asap_essay_scoring import utils
 
@@ -29,19 +32,14 @@ def prepare_data():
         'nword': [len(doc) for doc in toks]
     })
     X = pd.concat([X, emb], axis = 1)
-    # np.corrcoef(X.nchar.values, X.nword.values)
-    return {
-        'X': X,
-        'y': raw[TARGET].values,
-        'essay_set': raw['essay_set']
-    }
+    return data.Data(X = X, y = raw[TARGET].values, group = raw['essay_set'])
 
 def test_and_evaluate_lightgbm(data):
     print('fitting lightgbm')
-    lgbm = lgb.Lgbm(data, verbose=1)
-    lgbm.train_all_folds()
+    cp = cross_predict.CrossPredict(data = data, Learner = learners.Lgbm)
+    cp.train_all_folds()
     print('cross-validation performance:')
-    preds = lgbm.predict_all_folds()
+    preds = cp.predict_all_folds()
     preds['pred'] = np.round(preds.pred.values).astype('int')
     preds.sort_values('idx', inplace=True)
     preds['truth'] = raw[TARGET].astype('int').values
