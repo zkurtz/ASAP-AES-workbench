@@ -3,6 +3,7 @@
 This computes folds, fits a learner on each fold, and gathers the predictions
 on each hold-out set. It does not do any evaluation of those predictions '''
 
+import copy
 import numpy as np
 import pandas as pd
 import sklearn
@@ -15,7 +16,8 @@ class CrossPredict(object):
         :param verbose: (integer) verbosity level
         '''
         self.data = data
-        self.learner = Learner(params = hyperparameters)
+        self.params = hyperparameters
+        self.Learner = Learner
         self.verbose = verbose
         # Generate data folds
         np.random.seed(0)
@@ -33,8 +35,9 @@ class CrossPredict(object):
     def _train(self, idx):
         ''' Train a classifier on the data corresponding to the rows in `idx` '''
         data = self.data.select(idx)
-        self.learner.train(data)
-        return self.learner
+        learner = self.Learner(params = copy.deepcopy(self.params))
+        learner.train(data)
+        return learner
 
     def train_one_fold(self, k):
         '''

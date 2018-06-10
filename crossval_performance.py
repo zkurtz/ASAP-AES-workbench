@@ -5,7 +5,6 @@ import os
 import pandas as pd
 import pdb
 
-#from asap_essay_scoring import lightgbm as lgb
 from asap_essay_scoring import cross_predict
 from asap_essay_scoring import data
 from asap_essay_scoring import learners
@@ -41,7 +40,6 @@ def test_and_evaluate_lightgbm(data):
     print('cross-validation performance:')
     preds = cp.predict_all_folds()
     preds['pred'] = np.round(preds.pred.values).astype('int')
-    preds.sort_values('idx', inplace=True)
     preds['truth'] = raw[TARGET].astype('int').values
     metrics.evaluate(preds)
 
