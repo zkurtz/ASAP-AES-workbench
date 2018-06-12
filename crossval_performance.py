@@ -24,18 +24,29 @@ raw = pd.read_csv(utils.data_path('training_set_rel3.tsv'), sep='\t', encoding =
 emb = pd.read_csv(efpath("train_txt_features.csv"))
 toks = utils.json_load(efpath('train_tokenized.json'))
 
-def prepare_data():
+def prepare_data(use_embeddings=True):
     print('preparing data')
     X = pd.DataFrame({
         'nchar': [len(s) for s in raw.essay],
         'nword': [len(doc) for doc in toks]
     })
-    X = pd.concat([X, emb], axis = 1)
+    if use_embeddings:
+        X = pd.concat([X, emb], axis = 1)
     return data.Data(X = X, y = raw[TARGET].values, group = raw['essay_set'])
 
-def test_and_evaluate_lightgbm(data):
-    print('fitting lightgbm')
-    cp = cross_predict.CrossPredict(data = data, Learner = learners.Lgbm)
+# def test_and_evaluate_lightgbm(data):
+#     print('fitting lightgbm')
+#     cp = cross_predict.CrossPredict(data = data, Learner = learners.Lgbm)
+#     cp.train_all_folds()
+#     print('cross-validation performance:')
+#     preds = cp.predict_all_folds()
+#     preds['pred'] = np.round(preds.pred.values).astype('int')
+#     preds['truth'] = raw[TARGET].astype('int').values
+#     metrics.evaluate(preds)
+
+def evaluate(Learner, data):
+    print('fitting learner')
+    cp = cross_predict.CrossPredict(data = data, Learner = Learner)
     cp.train_all_folds()
     print('cross-validation performance:')
     preds = cp.predict_all_folds()
@@ -43,11 +54,19 @@ def test_and_evaluate_lightgbm(data):
     preds['truth'] = raw[TARGET].astype('int').values
     metrics.evaluate(preds)
 
-def length_only_lightgbm_benchmark():
-    data = prepare_data()
-    test_and_evaluate_lightgbm(data)
+def length_only_benchmark_lightgbm():
+    data = prepare_data(use_embeddings=False)
+    evaluate(learners.Lgbm, data)
 
-length_only_lightgbm_benchmark()
+def length_only_benchmark_randomforest():
+    data = prepare_data(use_embeddings=False)
+    evaluate(learners.Skrf, data)
+
+print('lightgbm: ')
+length_only_benchmark_lightgbm()
+
+print('random forest: ')
+length_only_benchmark_randomforest()
 
 # # Assemble data
 # emb['essay_set'] = df.essay_set
