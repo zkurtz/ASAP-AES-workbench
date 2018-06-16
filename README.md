@@ -1,9 +1,10 @@
 # ASAP-AES: word2vec and more
 
-This repo presents a solution for a Kaggle-hosted competition on automatic essay 
-scoring: https://www.kaggle.com/c/asap-aes
-
-The [performance testing log](#Performance-testing-log) documents progress over time.
+This repo presents a solution for a 
+[Kaggle-hosted competition](https://www.kaggle.com/c/asap-aes) 
+on automatic essay scoring. The 
+[performance testing log](#Performance-testing-log) 
+documents progress over time.
 
 ## Set up
 

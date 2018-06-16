@@ -12,7 +12,7 @@ USE_EMBEDDINGS = False
 
 # Load training
 dm = data.DataManager(target = TARGET, use_embeddings=USE_EMBEDDINGS)
-training_data = dm.prepare_data('train')
+training_data = dm.prepare_data()
 
 def evaluate(Learner, data):
     print('fitting learner')
