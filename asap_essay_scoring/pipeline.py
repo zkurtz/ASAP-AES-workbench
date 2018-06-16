@@ -8,8 +8,8 @@ develops into a more general tool (not specific to ASAP-AES)
 '''
 from gensim.models.word2vec import Word2Vec
 import pandas as pd
+import pdb
 
-from . import conf
 from . import tokens
 from . import utils
 from . import vocab
@@ -29,10 +29,14 @@ def reduce_docs_to_smaller_vocab(infile, outfile):
 
 def fit_word2vec(infile, outfile):
     reduced_docs = utils.json_load(infile)
+    # Abusing tools here slightly: Word2Vec expects a list of sentences, but we're providing
+    #   a list of documents instead, pretending that each document is a single sentence. The
+    #   fact that we include punctuation as tokens in our tokenization may help to preserve
+    #   the sentence structure that we're otherwise ignoring
     wv = Word2Vec(reduced_docs, size = 25, iter = 25)
-    wvdf = pd.DataFrame(wv[wv.wv.vocab])
-    wvdf.index = [key for key in wv.wv.vocab]
-    wvdf.to_csv(outfile, index = True)
+    vocab = list(wv.wv.vocab.keys())
+    df = pd.DataFrame([wv.wv.word_vec(w) for w in vocab], index=vocab)
+    df.to_csv(outfile, index = True)
 
 def essay_features_from_word_embeddings(reduced_docs_infile, embedding_infile, outfile):
     reduced_docs = utils.json_load(reduced_docs_infile)

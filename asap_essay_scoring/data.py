@@ -1,6 +1,7 @@
 
 import copy
 import numpy as np
+import pdb
 
 class Data(object):
     ''' Standardized data format that stores basic metadata and allows selecting on rows '''

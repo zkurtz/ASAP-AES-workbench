@@ -12,7 +12,7 @@ from asap_essay_scoring import metrics
 from asap_essay_scoring import utils
 
 # Configure
-TARGET = 'domain1_score'
+TARGET = 'domain1_score' # A simplification for now; ignoring `domain2_score` for essay set 2
 
 # utils
 def efpath(filename):
@@ -21,10 +21,11 @@ def efpath(filename):
 
 # Load training data inputs
 raw = pd.read_csv(utils.data_path('training_set_rel3.tsv'), sep='\t', encoding = "ISO-8859-1")
+raw[TARGET] = raw[TARGET].astype('int')
 emb = pd.read_csv(efpath("train_txt_features.csv"))
 toks = utils.json_load(efpath('train_tokenized.json'))
 
-def prepare_data(use_embeddings=True):
+def prepare_data(use_embeddings=False):
     print('preparing data')
     X = pd.DataFrame({
         'nchar': [len(s) for s in raw.essay],
@@ -34,24 +35,12 @@ def prepare_data(use_embeddings=True):
         X = pd.concat([X, emb], axis = 1)
     return data.Data(X = X, y = raw[TARGET].values, group = raw['essay_set'])
 
-# def test_and_evaluate_lightgbm(data):
-#     print('fitting lightgbm')
-#     cp = cross_predict.CrossPredict(data = data, Learner = learners.Lgbm)
-#     cp.train_all_folds()
-#     print('cross-validation performance:')
-#     preds = cp.predict_all_folds()
-#     preds['pred'] = np.round(preds.pred.values).astype('int')
-#     preds['truth'] = raw[TARGET].astype('int').values
-#     metrics.evaluate(preds)
-
 def evaluate(Learner, data):
     print('fitting learner')
     cp = cross_predict.CrossPredict(data = data, Learner = Learner)
-    cp.train_all_folds()
+    preds = cp.cross_predict()
     print('cross-validation performance:')
-    preds = cp.predict_all_folds()
-    preds['pred'] = np.round(preds.pred.values).astype('int')
-    preds['truth'] = raw[TARGET].astype('int').values
+    preds['pred'] = np.round(preds.pred.values).astype('int') # information loss :(
     metrics.evaluate(preds)
 
 def length_only_benchmark_lightgbm():
