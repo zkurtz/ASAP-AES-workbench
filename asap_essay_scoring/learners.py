@@ -4,7 +4,7 @@ import lightgbm as lgb
 from sklearn.ensemble import RandomForestRegressor
 
 class Lgbm(object):
-    def __init__(self, params):
+    def __init__(self, params = None):
         self.params = self.default_params()
         if params is not None:
             self.params.update(copy.deepcopy(params))
@@ -35,7 +35,7 @@ class Lgbm(object):
 
 class Skrf(object):
     ''' Wraps sklearn random forest'''
-    def __init__(self, params):
+    def __init__(self, params = None):
         self.params = self.default_params()
         if params is not None:
             self.params.update(copy.deepcopy(params))

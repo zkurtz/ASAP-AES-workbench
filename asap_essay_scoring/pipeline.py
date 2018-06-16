@@ -20,11 +20,23 @@ def tokenize(infile, outfile):
     doc_list = tk.apply_tokenize(df.essay)
     utils.json_save(doc_list, outfile)
 
-def reduce_docs_to_smaller_vocab(infile, outfile):
+def reduce_docs_to_smaller_vocab(infile, outfile, target_file = None):
+    '''
+    Simplify a list of tokenized documents by reducing the vocabulary size
+    :param infile: List of tokenized docs, the basis for the reduced vocabulary. If `target_file` is None,
+    then the simplified version of `infile` is what will get written to `outfile`
+    :param outfile: Where to write output
+    :param target_file: If specified, this is the collection of documents that will be reduce (instead of `infile`),
+    but `infile` is still the basis for the vocab
+    '''
     doc_list = utils.json_load(infile)
     vc = vocab.Vocab(vocab_size=3000)
     vc.build_from_tokenized_docs(doc_list)
-    reduced_docs = vc.reduce_docs(doc_list)
+    if target_file is not None:
+        target_docs = utils.json_load(target_file)
+        reduced_docs = vc.reduce_docs(target_docs)
+    else:
+        reduced_docs = vc.reduce_docs(doc_list)
     utils.json_save(reduced_docs, outfile)
 
 def fit_word2vec(infile, outfile):

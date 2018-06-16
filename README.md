@@ -26,17 +26,10 @@ mkdir engineered_features
 
 ```bash
 # Feature engineering on the training set
-python featurize_training_data.py
+python featurize_data.py
 
-# Fit the model: choose between one of two kinds:
-#   - cross_val: estimate the out-of-sample performance
-#   - build_final: build a model using all of the training data
+# Cross-validate the model
 python performance_crossval.py
-TODO python build_final_classifier.py
-
-# Compute the engineered features on the test set and test the classifier
-TODO python featurize_testing_data.py
-TODO python performance_final.py
 ```
 
 ## Performance testing log
@@ -45,16 +38,26 @@ This log tracks the progress in terms of improvements of prediction accuracy,
 including notes about which changes in methodology appeared to have
 led to improvements.
 
-Model development (including feature engineering, hyperparameter tuning, etc) relies on
-cross-validation and excludes use of the test data (`test_set.tsv`) data.
+Our test results are ultimately a bit biased upwards because our development process
+consists of a series of experiments on the same training data set (even though
+we are using cross validation). In an ideal scenario, we would complete
+model development on a training set and then test the result on a
+never-before-seen test set.
 
-Whenever I reach accuracy milestones that I can't resist 
-bragging about, I take the final step of computing the performance score on the test 
-set. I do this as rarely as possible, however, since each use of the test 
-data (`test_set.tsv`) contaminates the training procedure by 
-leaking information about the test set. 
+However, labels for the Kaggle-leaderboard test set (`test_set.tsv`) appear to
+never have been released. For example, [these authors state](https://arxiv.org/pdf/1606.04289.pdf)
 
-### Cross-validation
+> ... the test set was released without
+the gold score annotations, rendering any comparisons
+futile, and we are therefore restricted in
+splitting the given training set to create a new test
+set.
+
+Indeed, some published papers appear to have gotten away with reporting a
+cross-validation score as their main accuracy result, including 
+[this one](https://www.aclweb.org/anthology/D16-1193) and 
+[this one](https://dl.acm.org/citation.cfm?id=3098160). 
+
 
 - 2018.06.09: 
     - 0.047 LightGBM on # of words, # of characters. Definitely coder error is at fault considering 
@@ -67,6 +70,3 @@ leaking information about the test set.
     the [benhamner benchmark](https://github.com/benhamner/ASAP-AES/blob/master/Benchmarks/length_benchmark.py)
     ... something's off
     
-### Final evaluation
-
-- ... TODO
