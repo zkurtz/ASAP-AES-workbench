@@ -8,7 +8,7 @@ from asap_essay_scoring import metrics
 
 # Configure
 TARGET = 'domain1_score' # A simplification for now; ignoring `domain2_score` for essay set 2
-USE_EMBEDDINGS = False
+USE_EMBEDDINGS = True
 
 # Load training
 dm = data.DataManager(target = TARGET, use_embeddings=USE_EMBEDDINGS)

@@ -35,7 +35,7 @@ class DataManager(object):
         self.target = target
         self.emb = None
         if use_embeddings:
-            self.emb = pd.read_csv(utils.data_path("test_txt_features.csv"))
+            self.emb = pd.read_csv(efpath("txt_features.csv"))
         self.files = {
             'raw': utils.data_path('training_set_rel3.tsv'),
             'tokenized': efpath('tokenized.json')

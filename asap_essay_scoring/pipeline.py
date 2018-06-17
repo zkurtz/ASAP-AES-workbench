@@ -45,7 +45,7 @@ def fit_word2vec(infile, outfile):
     #   a list of documents instead, pretending that each document is a single sentence. The
     #   fact that we include punctuation as tokens in our tokenization may help to preserve
     #   the sentence structure that we're otherwise ignoring
-    wv = Word2Vec(reduced_docs, size = 25, iter = 25)
+    wv = Word2Vec(reduced_docs, size = 100, iter = 25)
     vocab = list(wv.wv.vocab.keys())
     df = pd.DataFrame([wv.wv.word_vec(w) for w in vocab], index=vocab)
     df.to_csv(outfile, index = True)

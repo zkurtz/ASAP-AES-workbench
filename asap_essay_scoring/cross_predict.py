@@ -40,7 +40,6 @@ class CrossPredict(object):
         test_data = self.data.select(test_idx)
         learner = self.Learner(params = copy.deepcopy(self.params))
         learner.train(train_data)
-        pdb.set_trace()
         return pd.DataFrame({
             'pred': learner.predict(test_data.X),
             'truth': test_data.y,

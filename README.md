@@ -66,8 +66,8 @@ cross-validation score as their main accuracy result, including
     - 0.3153 restored default LightGBM 100 boosting rounds. Still, why so low?
     - 0.363 include word2vec features
 
-- 2018.06.10:
-    - 0.281 is what I get with the random forest as in 
+- 2018.06.10: 0.281 is what I get with the random forest as in 
     the [benhamner benchmark](https://github.com/benhamner/ASAP-AES/blob/master/Benchmarks/length_benchmark.py)
-    ... something's off
-    
+    ... something's off?
+
+- 2018.06.17: 0.381 simply by increasing the wordvec dimensionality to 100 (from 25)

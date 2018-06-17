@@ -4,7 +4,7 @@ import pdb
 import when_will_it_end as wwie
 
 class Vocab(object):
-    # ## vocab of size 3000 is enough to account for nearly 95% or word-instances:
+    # ## vocab of size 3000 is enough to account for nearly 95% of word-instances:
     # sum(counts[:3000])/sum(counts)
     def __init__(self, vocab_size = 3000, wildcard = 'infrequentista'):
         '''
@@ -15,7 +15,6 @@ class Vocab(object):
         '''
         self.wildcard = wildcard
         self.vocab_size = vocab_size
-        #self.BREAK = 'break_doc_boundary'
 
     def build_from_tokenized_docs(self, doc_list):
         '''
