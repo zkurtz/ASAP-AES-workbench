@@ -14,6 +14,13 @@ USE_EMBEDDINGS = False
 dm = data.DataManager(target = TARGET, use_embeddings=USE_EMBEDDINGS)
 training_data = dm.prepare_data()
 
+grp8 = np.where(8 == training_data.group)
+d8 = training_data.select(grp8)
+df = d8.X.copy()
+df['y'] = d8.y
+df.y.corr(df.nchar)
+df.y.corr(df.nword)
+
 def evaluate(Learner, data):
     print('fitting learner')
     cp = cross_predict.CrossPredict(data = data, Learner = Learner)
@@ -25,5 +32,5 @@ def evaluate(Learner, data):
 print('lightgbm: ')
 evaluate(learners.Lgbm, data = training_data)
 
-print('random forest: ')
-evaluate(learners.Skrf, data = training_data)
+# print('random forest: ')
+# evaluate(learners.Skrf, data = training_data)

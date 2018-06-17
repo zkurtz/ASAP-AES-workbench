@@ -60,4 +60,5 @@ class DataManager(object):
             'nword': [len(doc) for doc in utils.json_load(self.files['tokenized'])]
         })
         return Data(X = self._attach_txt_features(X),
-                    y = raw[self.target].values, group = raw['essay_set'])
+                    y = raw[self.target].values,
+                    group = raw['essay_set'])
