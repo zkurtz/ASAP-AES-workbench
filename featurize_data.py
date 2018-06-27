@@ -32,13 +32,20 @@ pl.reduce_docs_to_smaller_vocab(
 print('Fit a 20-d word2vec model on the training data')
 pl.fit_word2vec(
     infile=efpath('tokenized_reduced.json'),
-    outfile=efpath("vocab_embedding.json")
+    outfile=efpath("vocab_embedding.csv")
+)
+
+print('Fit a doc2vec model on the training data')
+pl.fit_doc2vec(
+    infile=efpath('tokenized_reduced.json'),
+    outfile=efpath("doc_embedding.csv")
 )
 
 print('Generate word2vec document-level features for all documents')
-pl.essay_features_from_word_embeddings(
+pl.essay_features_from_embeddings(
     reduced_docs_infile=efpath('tokenized_reduced.json'),
-    embedding_infile=efpath("vocab_embedding.json"),
+    word2vec_infile=efpath("vocab_embedding.csv"),
+    doc2vec_infile = efpath("doc_embedding.csv"),
     outfile=efpath("txt_features.csv")
 )
 

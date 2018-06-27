@@ -1,11 +1,26 @@
 
 import copy
+import csv
 import numpy as np
 import os
 import pandas as pd
 import pdb
 
 from . import utils
+
+def get_domain1_ranges():
+    ''' Assuming this is correct:
+    https://github.com/nusnlp/nea/blob/3673d2af408d5a5cb22d0ed6ff1cd0b25a0a53aa/nea/asap_reader.py '''
+    return {
+        1: (2, 12),
+        2: (1, 6),
+        3: (0, 3),
+        4: (0, 3),
+        5: (0, 4),
+        6: (0, 4),
+        7: (0, 30),
+        8: (0, 60)
+    }
 
 class Data(object):
     ''' Standardized data format that stores basic metadata and allows selecting on rows '''
@@ -48,7 +63,10 @@ class DataManager(object):
             return df
 
     def _read_raw(self, file):
-        raw = pd.read_csv(file, sep='\t', encoding="ISO-8859-1")
+        # Reading this is tricky. The following pandas reader relies on these two posts:
+        #   - https://stackoverflow.com/a/37723241/2232265
+        #   - https://stackoverflow.com/a/35622971/2232265
+        raw = pd.read_csv(file, sep='\t', encoding='latin-1', quoting=csv.QUOTE_NONE)
         if self.target in raw.columns:
             raw[self.target] = raw[self.target].astype('int')
         return raw

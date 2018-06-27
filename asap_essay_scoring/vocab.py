@@ -72,13 +72,12 @@ class DocFeaturizer(object):
         emb = self.doc2embedding(doc)
         qts = emb.quantile(q=[0.05, 0.95])
         qvec = pd.concat([qts.iloc[0], qts.iloc[1]])
-        return qvec.tolist() + [len(doc)]
+        return qvec.tolist()
 
     def featurize_corpus(self, doc_list):
         n_docs = len(doc_list)
-        fl = [None]*n_docs
         lpm = wwie.LoopProgressMonitor(n = n_docs)
-        for k in range(n_docs):
+        def fd(doc):
             lpm()
-            fl[k] = self.featurize_doc(doc_list[k])
-        return pd.DataFrame(fl)
+            return self.featurize_doc(doc)
+        return pd.DataFrame([fd(doc) for doc in doc_list])

@@ -6,7 +6,8 @@ These functions make lots of assumptions about the format and contents of input 
 It could make sense to break off this submodule from the main module if asap_essay_scoring
 develops into a more general tool (not specific to ASAP-AES)
 '''
-from gensim.models.word2vec import Word2Vec
+import csv
+import gensim
 import pandas as pd
 import pdb
 
@@ -15,7 +16,7 @@ from . import utils
 from . import vocab
 
 def tokenize(infile, outfile):
-    df = pd.read_csv(infile, sep='\t', encoding="ISO-8859-1")
+    df = pd.read_csv(infile, sep='\t', encoding='latin-1', quoting=csv.QUOTE_NONE)
     tk = tokens.Tokenizer()
     doc_list = tk.apply_tokenize(df.essay)
     utils.json_save(doc_list, outfile)
@@ -45,14 +46,30 @@ def fit_word2vec(infile, outfile):
     #   a list of documents instead, pretending that each document is a single sentence. The
     #   fact that we include punctuation as tokens in our tokenization may help to preserve
     #   the sentence structure that we're otherwise ignoring
-    wv = Word2Vec(reduced_docs, size = 100, iter = 25)
+    wv = gensim.models.word2vec.Word2Vec(reduced_docs, size = 100, iter = 25)
     vocab = list(wv.wv.vocab.keys())
     df = pd.DataFrame([wv.wv.word_vec(w) for w in vocab], index=vocab)
     df.to_csv(outfile, index = True)
 
-def essay_features_from_word_embeddings(reduced_docs_infile, embedding_infile, outfile):
+def fit_doc2vec(infile, outfile):
+    corpus = [
+        gensim.models.doc2vec.TaggedDocument(doc, [i])
+        for i, doc in enumerate(utils.json_load(infile))
+    ]
+    print("building doc2vec vocab")
+    model = gensim.models.doc2vec.Doc2Vec(vector_size=50, epochs=55)
+    model.build_vocab(corpus)
+    print("fitting doc2vec model")
+    model.train(corpus, total_examples=model.corpus_count, epochs=model.epochs)
+    model.save("model_temp")
+    df = pd.DataFrame([model.docvecs[c.tags[0]] for c in corpus])
+    df.rename(columns = {k: 'docvec_' + str(k) for k in range(df.shape[1])}, inplace = True)
+    df.to_csv(outfile, index=False)
+
+def essay_features_from_embeddings(reduced_docs_infile, word2vec_infile, doc2vec_infile, outfile):
+    d2v = pd.read_csv(doc2vec_infile)
     reduced_docs = utils.json_load(reduced_docs_infile)
-    embedding = pd.read_csv(embedding_infile, index_col = 0)
+    embedding = pd.read_csv(word2vec_infile, index_col = 0)
     dft = vocab.DocFeaturizer(vocab_embedding=embedding)
     feats = dft.featurize_corpus(reduced_docs)
-    feats.to_csv(outfile, index = False)
+    pd.concat([feats, d2v], axis = 1).to_csv(outfile, index = False)

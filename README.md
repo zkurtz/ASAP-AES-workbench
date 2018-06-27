@@ -2,9 +2,7 @@
 
 This repo presents a solution for a 
 [Kaggle-hosted competition](https://www.kaggle.com/c/asap-aes) 
-on automatic essay scoring. The 
-[performance testing log](#Performance-testing-log) 
-documents progress over time.
+on automatic essay scoring. 
 
 ## Set up
 
@@ -33,7 +31,7 @@ python featurize_data.py
 python performance_crossval.py
 ```
 
-## Performance testing log
+## Performance log
 
 This log tracks the progress in terms of improvements of prediction accuracy, 
 including notes about which changes in methodology appeared to have
@@ -66,8 +64,8 @@ cross-validation score as their main accuracy result, including
     - 0.3153 restored default LightGBM 100 boosting rounds. Still, why so low?
     - 0.363 include word2vec features
 
-- 2018.06.10: 0.281 is what I get with the random forest as in 
+- 2018.06.10: 0.281 with the random forest as in 
     the [benhamner benchmark](https://github.com/benhamner/ASAP-AES/blob/master/Benchmarks/length_benchmark.py)
-    ... something's off?
+    whereas his leaderboard score is 0.64? ... something's off!
 
 - 2018.06.17: 0.381 simply by increasing the wordvec dimensionality to 100 (from 25)

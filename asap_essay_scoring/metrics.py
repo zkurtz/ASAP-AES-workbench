@@ -4,6 +4,9 @@
 #   https://github.com/nusnlp/nea/blob/master/nea/quadratic_weighted_kappa.py
 
 import numpy as np
+import pdb
+
+from .data import get_domain1_ranges
 
 def confusion_matrix(rater_a, rater_b, min_rating=None, max_rating=None):
     """
@@ -18,7 +21,10 @@ def confusion_matrix(rater_a, rater_b, min_rating=None, max_rating=None):
     conf_mat = [[0 for i in range(num_ratings)]
                 for j in range(num_ratings)]
     for a, b in zip(rater_a, rater_b):
-        conf_mat[a - min_rating][b - min_rating] += 1
+        try:
+            conf_mat[a - min_rating][b - min_rating] += 1
+        except:
+            pdb.set_trace()
     return conf_mat
 
 
@@ -161,21 +167,12 @@ def mean_quadratic_weighted_kappa(kappas, weights=None):
 
 def mykappa(e, g):
     '''
-    Assuming this is correct: https://github.com/nusnlp/nea/blob/3673d2af408d5a5cb22d0ed6ff1cd0b25a0a53aa/nea/asap_reader.py
+    Compute kappa for essay group e and standardized data frame g
     '''
-    asap_ranges = {
-        1: (2, 12),
-        2: (1, 6),
-        3: (0, 3),
-        4: (0, 3),
-        5: (0, 4),
-        6: (0, 4),
-        7: (0, 30),
-        8: (0, 60)
-    }
+    asap_ranges = get_domain1_ranges()
     return kappa(
-        rater_a=g.pred.values,
-        rater_b=g.truth.values,
+        rater_a=g.pred.tolist(),
+        rater_b=g.truth.tolist(),
         min_rating=asap_ranges[e][0],
         max_rating=asap_ranges[e][1]
     )
