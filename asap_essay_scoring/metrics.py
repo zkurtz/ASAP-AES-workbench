@@ -177,10 +177,16 @@ def mykappa(e, g):
         max_rating=asap_ranges[e][1]
     )
 
-def evaluate(preds):
+def evaluate(preds, method = 'kappa'):
     '''
     :param preds: (pd.DataFrame) must include integer columns ['truth', 'pred', 'essay_set']
     '''
-    kappas = [mykappa(e, g) for e, g in preds.groupby('essay_set')]
-    print(kappas)
-    print(mean_quadratic_weighted_kappa(kappas))
+    groups = preds.groupby('essay_set')
+    if method == 'kappa':
+        kappas = [mykappa(e, g) for e, g in groups]
+        print(kappas)
+        print(mean_quadratic_weighted_kappa(kappas))
+    elif method == 'mse':
+        ms = [np.mean((g.pred - g.truth)**2) for e, g in groups]
+        print(ms)
+        print(np.mean(ms))

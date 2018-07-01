@@ -8,6 +8,17 @@ import pdb
 
 from . import utils
 
+def read_raw_csv(file, target = 'domain1_score'):
+    '''
+    Reading the main training file is tricky. We rely on these two posts:
+       - https://stackoverflow.com/a/37723241/2232265
+       - https://stackoverflow.com/a/35622971/2232265
+    '''
+    raw = pd.read_csv(file, sep='\t', encoding='latin-1', quoting=csv.QUOTE_NONE)
+    if target in raw.columns:
+        raw[target] = raw[target].astype('int')
+    return raw
+
 def get_domain1_ranges():
     ''' Assuming this is correct:
     https://github.com/nusnlp/nea/blob/3673d2af408d5a5cb22d0ed6ff1cd0b25a0a53aa/nea/asap_reader.py '''
@@ -46,37 +57,48 @@ def efpath(filename):
     return utils.data_path(os.path.join('engineered_features', filename))
 
 class DataManager(object):
-    def __init__(self, target, use_embeddings=False):
+    def __init__(self, target, feature_types = ['len_benchmark', 'wordvec', 'docvec']):
         self.target = target
-        self.emb = None
-        if use_embeddings:
-            self.emb = pd.read_csv(efpath("txt_features.csv"))
-        self.files = {
-            'raw': utils.data_path('training_set_rel3.tsv'),
-            'tokenized': efpath('tokenized.json')
-        }
+        self._load('raw')
+        self.feature_types = feature_types
 
-    def _attach_txt_features(self, df):
-        if self.emb is not None:
-            return pd.concat([df, self.emb], axis=1)
+    def _load(self, feature_set):
+        if hasattr(self, feature_set):
+            return
+        if feature_set == 'raw':
+            f = utils.data_path('training_set_rel3.tsv')
+            self.raw = read_raw_csv(f, target=self.target)
+        elif feature_set == 'tokenized':
+            self.tokenized = utils.json_load(efpath('tokenized.json'))
+        elif feature_set == 'wordvec_features':
+            self.wordvec_features = pd.read_csv(efpath("wordvec_features.csv"))
+        elif feature_set == 'docvec_features':
+            self.docvec_features = pd.read_csv(efpath("docvec_features.csv"))
         else:
-            return df
+            raise Exception('invalid feature_set')
 
-    def _read_raw(self, file):
-        # Reading this is tricky. The following pandas reader relies on these two posts:
-        #   - https://stackoverflow.com/a/37723241/2232265
-        #   - https://stackoverflow.com/a/35622971/2232265
-        raw = pd.read_csv(file, sep='\t', encoding='latin-1', quoting=csv.QUOTE_NONE)
-        if self.target in raw.columns:
-            raw[self.target] = raw[self.target].astype('int')
-        return raw
-
-    def prepare_data(self):
-        raw = self._read_raw(self.files['raw'])
-        X = pd.DataFrame({
-            'nchar': [len(s) for s in raw.essay],
-            'nword': [len(doc) for doc in utils.json_load(self.files['tokenized'])]
+    def len_benchmark(self):
+        self._load('tokenized')
+        return pd.DataFrame({
+            'nchar': [len(s) for s in self.raw.essay],
+            'nword': [len(doc) for doc in self.tokenized]
         })
-        return Data(X = self._attach_txt_features(X),
-                    y = raw[self.target].values,
-                    group = raw['essay_set'])
+
+    def wordvec(self):
+        self._load('wordvec_features')
+        return self.wordvec_features
+
+    def docvec(self):
+        self._load('docvec_features')
+        return self.docvec_features
+
+    def prepare_data(self, feature_types = None):
+        if feature_types is not None:
+            self.feature_types = feature_types
+        assert len(feature_types) > 0
+        self.feature_builders = [getattr(self, s) for s in self.feature_types]
+        feature_dataframes = [f() for f in self.feature_builders]
+        features = pd.concat(feature_dataframes, axis=1)
+        return Data(X = features,
+                    y = self.raw[self.target].values,
+                    group = self.raw['essay_set'])

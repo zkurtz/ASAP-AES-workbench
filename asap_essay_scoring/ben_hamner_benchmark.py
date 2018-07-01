@@ -1,8 +1,9 @@
 import pdb
 import pandas as pd
 
-from asap_essay_scoring import metrics
-from asap_essay_scoring.utils import data_path as dp
+from . import data
+from . import metrics
+from .utils import data_path as dp
 
 training_data_file = dp("training_set_rel3.tsv")
 test_data_file = training_data_file # predicting on the training set should be a best-case scenario for performance
@@ -123,11 +124,11 @@ def main():
 
 if __name__ == "__main__":
     main()
+    # Debugging and exploring:
     df = pd.read_csv(output_file)
-    import csv
-    dd = pd.read_csv(training_data_file, sep='\t', encoding='latin-1', quoting=csv.QUOTE_NONE)
+    dd = data.read_raw_csv(training_data_file)
     zz = dd[['essay_id', 'domain1_score']].merge(df, on='essay_id', how='outer')
     zz.rename(columns = {'domain1_score': 'truth'}, inplace = True)
-    metrics.evaluate(zz)
+    metrics.evaluate(zz) #0.8306 average (with cheating, not cross-validation)
     zz.to_csv(dp("hamner_features.csv"), index = False)
     pdb.set_trace()

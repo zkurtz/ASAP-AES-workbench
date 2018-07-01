@@ -9,7 +9,7 @@ class CrossPredict(object):
     ''' Facilitate cross-validation for an arbitrary learner.
     This computes folds, fits a learner on each fold, and gathers the predictions
     on each hold-out set. It does not do any evaluation of those predictions '''
-    def __init__(self, data, Learner, hyperparameters = None, verbose = 0):
+    def __init__(self, data, Learner, hyperparameters = None, n_fold = 5, verbose = 0):
         '''
         :param data: list containing numeric features 'X' as pandas DataFrame and labels 'y' as numeric numpy array
         :param Learner: Any of the learner classes defined in ./learners.py
@@ -21,7 +21,7 @@ class CrossPredict(object):
         self.verbose = verbose
         # Generate data folds
         np.random.seed(0)
-        kfs = sklearn.model_selection.StratifiedKFold(n_splits=5, shuffle=True)
+        kfs = sklearn.model_selection.StratifiedKFold(n_splits=n_fold, shuffle=True)
         self.folds = [
             {'train': train_index, 'test': test_index}
             for train_index, test_index in kfs.split(self.data.X, self.data.group)
@@ -86,7 +86,7 @@ class CrossPredict(object):
         ratios = df.train_count/df.test_count
         max_ratio = ratios.max()
         min_ratio = ratios.min()
-        assert max_ratio/min_ratio < 1.01
+        assert max_ratio/min_ratio < 1.02
         if self.verbose:
             print('Cross predict involves fitting and predicting with ' + str(df.shape[0]) +
                   ' different models,\n   one for every fold-essay set combination')

@@ -58,7 +58,7 @@ class Lgbm(AbstractLearner):
             'objective': 'regression',
             'learning_rate': 0.1,
             'verbose': -1,
-            'num_boost_round': 100
+            'num_boost_round': 29
         }
 
     def train(self, data):
@@ -68,6 +68,11 @@ class Lgbm(AbstractLearner):
         ld = lgb.Dataset(data.X, data.y)
         params = copy.deepcopy(self.params)
         nround = params.pop('num_boost_round')
+        # zz = self.bst = lgb.cv(params=params,
+        #                   train_set=ld,
+        #                   num_boost_round=nround,
+        #                   verbose_eval=False)
+        # pdb.set_trace()
         self.bst = lgb.train(params=params,
                             train_set=ld,
                             num_boost_round=nround,

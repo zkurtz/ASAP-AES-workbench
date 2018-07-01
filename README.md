@@ -61,11 +61,21 @@ cross-validation score as their main accuracy result, including
 - 2018.06.09: 
     - 0.047 LightGBM on # of words, # of characters. Definitely coder error is at fault considering 
     that the analogous benchmark scored 0.64 on the kaggle leaderboard.
-    - 0.3153 restored default LightGBM 100 boosting rounds. Still, why so low?
+    - 0.3153 restored default LightGBM 100 boosting rounds.
     - 0.363 include word2vec features
 
-- 2018.06.10: 0.281 with the random forest as in 
-    the [benhamner benchmark](https://github.com/benhamner/ASAP-AES/blob/master/Benchmarks/length_benchmark.py)
-    whereas his leaderboard score is 0.64? ... something's off!
+- 2018.06.10: 0.281 with the random forest as in [benhamner benchmark](https://github.com/benhamner/ASAP-AES/blob/master/Benchmarks/length_benchmark.py)
+    whereas his leaderboard score is 0.64? Something's off! One possible explanation is that
+    the testing set was systematically different -- and easier to score -- than
+    the training set in the Kaggle competition. Note that https://github.com/zlliang/essaysense also
+    report training-set QWK scores far below that benchmark.
 
 - 2018.06.17: 0.381 simply by increasing the wordvec dimensionality to 100 (from 25)
+
+## Related work
+
+The following are very similar projects to this one. I've ranked them very approximatley in 
+descending order of sophistication:
+
+- https://github.com/zlliang/essaysense 
+- https://github.com/benhamner/ASAP-AES/blob/master/Benchmarks/length_benchmark.py

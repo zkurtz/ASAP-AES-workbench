@@ -6,17 +6,17 @@ These functions make lots of assumptions about the format and contents of input 
 It could make sense to break off this submodule from the main module if asap_essay_scoring
 develops into a more general tool (not specific to ASAP-AES)
 '''
-import csv
 import gensim
 import pandas as pd
 import pdb
 
+from . import data
 from . import tokens
 from . import utils
 from . import vocab
 
 def tokenize(infile, outfile):
-    df = pd.read_csv(infile, sep='\t', encoding='latin-1', quoting=csv.QUOTE_NONE)
+    df = data.read_raw_csv(infile)
     tk = tokens.Tokenizer()
     doc_list = tk.apply_tokenize(df.essay)
     utils.json_save(doc_list, outfile)
@@ -51,6 +51,14 @@ def fit_word2vec(infile, outfile):
     df = pd.DataFrame([wv.wv.word_vec(w) for w in vocab], index=vocab)
     df.to_csv(outfile, index = True)
 
+def essay_features_from_word2vec(word2vec_infile, reduced_docs_infile, outfile):
+    reduced_docs = utils.json_load(reduced_docs_infile)
+    embedding = pd.read_csv(word2vec_infile, index_col = 0)
+    dft = vocab.DocFeaturizer(vocab_embedding=embedding)
+    df = dft.featurize_corpus(reduced_docs)
+    df.rename(columns={k: 'wordvec_' + str(k) for k in range(df.shape[1])}, inplace=True)
+    df.to_csv(outfile, index = False)
+
 def fit_doc2vec(infile, outfile):
     corpus = [
         gensim.models.doc2vec.TaggedDocument(doc, [i])
@@ -65,11 +73,3 @@ def fit_doc2vec(infile, outfile):
     df = pd.DataFrame([model.docvecs[c.tags[0]] for c in corpus])
     df.rename(columns = {k: 'docvec_' + str(k) for k in range(df.shape[1])}, inplace = True)
     df.to_csv(outfile, index=False)
-
-def essay_features_from_embeddings(reduced_docs_infile, word2vec_infile, doc2vec_infile, outfile):
-    d2v = pd.read_csv(doc2vec_infile)
-    reduced_docs = utils.json_load(reduced_docs_infile)
-    embedding = pd.read_csv(word2vec_infile, index_col = 0)
-    dft = vocab.DocFeaturizer(vocab_embedding=embedding)
-    feats = dft.featurize_corpus(reduced_docs)
-    pd.concat([feats, d2v], axis = 1).to_csv(outfile, index = False)
