@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import pdb
 
@@ -70,9 +71,21 @@ class DocFeaturizer(object):
 
     def featurize_doc(self, doc):
         emb = self.doc2embedding(doc)
+        N = emb.shape[1]
+        mean = emb.mean()
+        mean.index = ['wv_' + str(k) + '_mean' for k in range(N)]
         qts = emb.quantile(q=[0.05, 0.95])
-        qvec = pd.concat([qts.iloc[0], qts.iloc[1]])
-        return qvec.tolist()
+        pct5 = qts.iloc[0]
+        pct95 = qts.iloc[1]
+        pct5.index = ['wv_' + str(k) + '_pct_5' for k in range(N)]
+        pct95.index = ['wv_' + str(k) + '_pct_95' for k in range(N)]
+        sequential_euclidean_dist = np.mean((emb[:-1].values - emb[1:].values)**2, axis = 1)
+        sed = pd.Series({
+            'seq_dist_mean': np.mean(sequential_euclidean_dist),
+            'seq_dist_pct_5': np.percentile(sequential_euclidean_dist, 5),
+            'seq_dist_pct_95': np.percentile(sequential_euclidean_dist, 95)
+        })
+        return pd.concat([pct5, pct95, mean, sed])
 
     def featurize_corpus(self, doc_list):
         n_docs = len(doc_list)
@@ -80,4 +93,5 @@ class DocFeaturizer(object):
         def fd(doc):
             lpm()
             return self.featurize_doc(doc)
-        return pd.DataFrame([fd(doc) for doc in doc_list])
+        df = pd.concat([fd(doc) for doc in doc_list], axis=1).transpose()
+        return df

@@ -5,7 +5,7 @@ from asap_essay_scoring import metrics
 
 # Configure
 TARGET = 'domain1_score'
-FEATURE_TYPES = ['len_benchmark', 'wordvec', 'docvec']
+FEATURE_TYPES = ['len_benchmark', 'wordvec', 'token']
 
 # Load training
 dm = data.DataManager(target = TARGET)

@@ -7,6 +7,7 @@ It could make sense to break off this submodule from the main module if asap_ess
 develops into a more general tool (not specific to ASAP-AES)
 '''
 import gensim
+import numpy as np
 import pandas as pd
 import pdb
 
@@ -20,6 +21,15 @@ def tokenize(infile, outfile):
     tk = tokens.Tokenizer()
     doc_list = tk.apply_tokenize(df.essay)
     utils.json_save(doc_list, outfile)
+
+def token_features(infile, outfile):
+    doc_list = utils.json_load(infile)
+    df = pd.DataFrame({
+        'word_len_mean': [np.mean([len(t) for t in essay]) for essay in doc_list],
+        'word_len_std': [np.std([len(t) for t in essay]) for essay in doc_list]
+    })
+    df.to_csv(outfile, index=False)
+    #pdb.set_trace()
 
 def reduce_docs_to_smaller_vocab(infile, outfile, target_file = None):
     '''
@@ -56,7 +66,6 @@ def essay_features_from_word2vec(word2vec_infile, reduced_docs_infile, outfile):
     embedding = pd.read_csv(word2vec_infile, index_col = 0)
     dft = vocab.DocFeaturizer(vocab_embedding=embedding)
     df = dft.featurize_corpus(reduced_docs)
-    df.rename(columns={k: 'wordvec_' + str(k) for k in range(df.shape[1])}, inplace=True)
     df.to_csv(outfile, index = False)
 
 def fit_doc2vec(infile, outfile):

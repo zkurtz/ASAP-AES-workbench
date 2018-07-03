@@ -57,7 +57,7 @@ def efpath(filename):
     return utils.data_path(os.path.join('engineered_features', filename))
 
 class DataManager(object):
-    def __init__(self, target, feature_types = ['len_benchmark', 'wordvec', 'docvec']):
+    def __init__(self, target, feature_types = ['len_benchmark', 'wordvec', 'token']):
         self.target = target
         self._load('raw')
         self.feature_types = feature_types
@@ -70,6 +70,8 @@ class DataManager(object):
             self.raw = read_raw_csv(f, target=self.target)
         elif feature_set == 'tokenized':
             self.tokenized = utils.json_load(efpath('tokenized.json'))
+        elif feature_set == 'token_features':
+            self.token_features = pd.read_csv(efpath("token_features.csv"))
         elif feature_set == 'wordvec_features':
             self.wordvec_features = pd.read_csv(efpath("wordvec_features.csv"))
         elif feature_set == 'docvec_features':
@@ -83,6 +85,10 @@ class DataManager(object):
             'nchar': [len(s) for s in self.raw.essay],
             'nword': [len(doc) for doc in self.tokenized]
         })
+
+    def token(self):
+        self._load('token_features')
+        return self.token_features
 
     def wordvec(self):
         self._load('wordvec_features')
