@@ -21,6 +21,12 @@ cd ~/.kaggle/competitions/asap-aes
 mkdir engineered_features
 ```
 
+## Organization
+
+`featurize_data.py` and `performance_crossval.py` are the main model building and
+evaluation scripts as explained below. The `notebooks` directory contains a couple of
+exploratory analyses.
+
 ## Model preparation, building, testing
 
 ```bash
@@ -71,6 +77,10 @@ cross-validation score as their main accuracy result, including
     report training-set QWK scores far below that benchmark.
 
 - 2018.06.17: 0.381 simply by increasing the wordvec dimensionality to 100 (from 25)
+
+- 2018.07.03: 0.387 after dropping doc2vec and adding word2vec means (in addition to percentiles).
+The new "sequential euclidean differences" feature did not seem to help.
+
 
 ## Related work
 

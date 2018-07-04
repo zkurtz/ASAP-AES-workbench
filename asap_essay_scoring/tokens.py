@@ -34,3 +34,4 @@ class Tokenizer(object):
             lpm()
             res[k] = self.tokenize(list_of_strings[k])
         return res
+
